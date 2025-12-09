@@ -39,7 +39,7 @@ jobs:
               run: bunx tsc --noEmit
 
     validate-node:
-        name: Validate with Bun.
+        name: Validate with Node.js.
         runs-on: ubuntu-latest
 
         steps:
@@ -55,7 +55,7 @@ jobs:
               run: npm install
 
             - name: Validate code using ESlint.
-              run: npm run lint
+              run: npx eslint .
 
             - name: Validate code using TypeScript Compiler.
               run: npx tsc --noEmit
