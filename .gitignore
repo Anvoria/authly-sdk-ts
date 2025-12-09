@@ -1,0 +1,14 @@
+# IDE files.
+/.idea/
+/.vscode/
+/.vs/
+/.cursor/
+
+# Libraries.
+/node_modules/
+
+# Build files.
+/dist/
+
+# macOS files.
+.DS_Store
