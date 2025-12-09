@@ -32,6 +32,8 @@
     ],
     "scripts": {
         "format": "bunx prettier --write .",
+        "lint": "bunx eslint .",
+        "lint:fix": "bunx eslint --fix .",
         "prepare": "husky"
     },
     "devDependencies": {
