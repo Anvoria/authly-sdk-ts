@@ -35,7 +35,14 @@
         "prepare": "husky"
     },
     "devDependencies": {
+        "@eslint/js": "^9.39.1",
+        "@eslint/json": "^0.14.0",
+        "@eslint/markdown": "^7.5.1",
+        "eslint": "^9.39.1",
+        "globals": "^16.5.0",
         "husky": "^9.1.7",
-        "prettier": "^3.7.4"
+        "jiti": "^2.6.1",
+        "prettier": "^3.7.4",
+        "typescript-eslint": "^8.49.0"
     }
 }
