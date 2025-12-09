@@ -17,6 +17,9 @@ export default defineConfig([
                 ...globals.node,
             },
         },
+        rules: {
+            "no-undef": "off", // TypeScript handles this
+        },
     },
     {
         files: ["**/*.json"],
