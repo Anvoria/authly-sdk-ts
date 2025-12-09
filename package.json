@@ -1,0 +1,35 @@
+{
+    "name": "@authly/sdk",
+    "description": "A library for building authentication systems using Authly.",
+    "version": "1.0.0",
+    "author": {
+        "name": "Anvoria",
+        "url": "https://github.com/Anvoria"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Anvoria/authly-sdk.git"
+    },
+    "homepage": "https://github.com/Anvoria/authly-sdk",
+    "bugs": {
+        "url": "https://github.com/Anvoria/authly-sdk/issues"
+    },
+    "keywords": [
+        "authentication",
+        "authorization",
+        "authentication-library",
+        "authly"
+    ],
+    "engines": {
+        "node": ">=18.0.0",
+        "bun": ">=1.0.0"
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {},
+    "devDependencies": {}
+}
