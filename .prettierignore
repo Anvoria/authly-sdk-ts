@@ -1,0 +1,18 @@
+# IDE files.
+/.idea/
+/.vscode/
+/.vs/
+/.cursor/
+
+# Libraries and lockfiles.
+/node_modules/
+/package-lock.json
+/pnpm-lock.yaml
+/bun.lock
+/bun.lockb
+
+# Build files.
+/dist/
+
+# macOS files.
+.DS_Store
