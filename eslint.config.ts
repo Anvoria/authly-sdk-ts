@@ -18,7 +18,7 @@ export default defineConfig([
             },
         },
         rules: {
-            "no-undef": "off", // TypeScript handles this
+            "no-undef": "off",
         },
     },
     {
