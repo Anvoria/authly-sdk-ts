@@ -36,6 +36,15 @@
         "lint:fix": "bunx eslint --fix .",
         "prepare": "husky"
     },
+    "lint-staged": {
+        "*.{ts,json,jsonc,md}": [
+            "eslint --fix",
+            "prettier --write"
+        ],
+        "*,{yml,yaml}": [
+            "prettier --write"
+        ]
+    },
     "devDependencies": {
         "@eslint/js": "^9.39.1",
         "@eslint/json": "^0.14.0",
@@ -44,6 +53,7 @@
         "globals": "^16.5.0",
         "husky": "^9.1.7",
         "jiti": "^2.6.1",
+        "lint-staged": "^16.2.7",
         "prettier": "^3.7.4",
         "typescript-eslint": "^8.49.0"
     }
