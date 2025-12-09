@@ -8,6 +8,9 @@ import { defineConfig } from "eslint/config"
 export default defineConfig([
     tseslint.configs.recommended,
     {
+        ignores: ["dist/", "node_modules/", "package-lock.json", "pnpm-lock.yaml", "bun.lock", "bun.lockb"],
+    },
+    {
         files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
         plugins: { js },
         extends: ["js/recommended"],
