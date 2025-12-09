@@ -31,9 +31,11 @@
         "dist"
     ],
     "scripts": {
-        "format": "bunx prettier --write ."
+        "format": "bunx prettier --write .",
+        "prepare": "husky"
     },
     "devDependencies": {
+        "husky": "^9.1.7",
         "prettier": "^3.7.4"
     }
 }
