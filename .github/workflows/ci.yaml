@@ -38,6 +38,9 @@ jobs:
             - name: Validate code using TypeScript Compiler.
               run: bunx tsc --noEmit
 
+            - name: Run tests using native Bun.
+              run: bun test
+
     validate-node:
         name: Validate with Node.js.
         runs-on: ubuntu-latest
@@ -59,3 +62,6 @@ jobs:
 
             - name: Validate code using TypeScript Compiler.
               run: npx tsc --noEmit
+
+            - name: Run tests using Node.js.
+              run: npm test
