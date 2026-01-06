@@ -1,7 +1,7 @@
 {
     "name": "@authly/sdk",
     "description": "A library for building authentication systems using Authly.",
-    "version": "1.0.1",
+    "version": "1.1.1",
     "author": {
         "name": "Anvoria",
         "url": "https://github.com/Anvoria"
@@ -59,7 +59,7 @@
         "@types/bun": "^1.3.4",
         "@types/node": "^25.0.3",
         "eslint": "^9.39.2",
-        "globals": "^16.5.0",
+        "globals": "^17.0.0",
         "husky": "^9.1.7",
         "jiti": "^2.6.1",
         "lint-staged": "^16.2.7",
