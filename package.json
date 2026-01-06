@@ -1,7 +1,7 @@
 {
     "name": "@authly/sdk",
     "description": "A library for building authentication systems using Authly.",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "author": {
         "name": "Anvoria",
         "url": "https://github.com/Anvoria"
