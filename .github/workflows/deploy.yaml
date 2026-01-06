@@ -1,0 +1,43 @@
+name: Publish to NPM registry.
+
+on:
+    push:
+        tags:
+            - "v*"
+
+defaults:
+    run:
+        working-directory: .
+        shell: bash
+
+permissions:
+    contents: read
+    id-token: write
+
+jobs:
+    publish:
+        name: Publish a package to NPM registry.
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code.
+              uses: actions/checkout@v6
+
+            - name: Setup Bun.
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies.
+              run: bun install --frozen-lockfile
+
+            - name: Set project version.
+              run: |
+                  VERSION=${{ github.ref_name }}
+                  bun ./scripts/DeployScript.tsmov "${VERSION}"
+
+            - name: Build package.
+              run: bun run build
+
+            - name: Publish a package to NPM registry.
+              run: bunx npm publish --provenance --access public
