@@ -1,4 +1,4 @@
-import { DEFAULT_JWKS_PATH } from "../../config"
+import { DEFAULT_AUTHORIZE_PATH, DEFAULT_JWKS_PATH } from "../../config"
 import { JWTVerifier } from "./internal/JWTVerifier"
 import type { Claims } from "../../models/Claims"
 
@@ -23,26 +23,63 @@ export interface AuthlyClientOptions {
      */
     jwksPath?: string
     /**
+     * The path to the authorize endpoint relative to the issuer. Defaults to "/v1/oauth/authorize".
+     */
+    authorizePath?: string
+    /**
      * A list of allowed signing algorithms. If omitted, defaults to ["RS256"].
      */
     algorithms?: string[]
 }
 
 /**
- * A client for verifying Authly JWT tokens.
+ * Options for generating an authorization URL.
+ */
+export interface AuthorizeUrlOptions {
+    /**
+     * The URI to redirect back to after authentication.
+     */
+    redirectUri: string
+    /**
+     * A unique state string to prevent CSRF.
+     */
+    state: string
+    /**
+     * The PKCE code challenge.
+     */
+    codeChallenge: string
+    /**
+     * The PKCE code challenge method. Defaults to "S256".
+     */
+    codeChallengeMethod?: "S256" | "plain"
+    /**
+     * The requested scopes. Defaults to "openid profile email".
+     */
+    scope?: string
+    /**
+     * The OAuth2 response type. Defaults to "code".
+     */
+    responseType?: string
+}
+
+/**
+ * A client for interacting with Authly.
  *
  * This client handles the validation of tokens against a specific issuer and audience,
- * fetching the public keys (JWKS) automatically.
+ * fetching the public keys (JWKS) automatically, and provides utilities for
+ * starting the OAuth2 flow.
  */
 export class AuthlyClient {
     private readonly verifier: JWTVerifier
     private readonly serviceId: string
     private readonly issuer: string
+    private readonly authorizePath: string
 
     constructor(options: AuthlyClientOptions) {
         this.issuer = options.issuer.replace(/\/$/, "")
         this.serviceId = options.serviceId
         const jwksPath = options.jwksPath || DEFAULT_JWKS_PATH
+        this.authorizePath = options.authorizePath || DEFAULT_AUTHORIZE_PATH
 
         this.verifier = new JWTVerifier({
             issuer: this.issuer,
@@ -50,6 +87,26 @@ export class AuthlyClient {
             jwksUrl: `${this.issuer}${jwksPath}`,
             algorithms: options.algorithms,
         })
+    }
+
+    /**
+     * Generate the authorization URL to redirect the user to.
+     *
+     * @param options - Options for generating the URL.
+     * @returns The full authorization URL.
+     */
+    public getAuthorizeUrl(options: AuthorizeUrlOptions): string {
+        const url = new URL(`${this.issuer}${this.authorizePath}`)
+
+        url.searchParams.set("client_id", this.serviceId)
+        url.searchParams.set("redirect_uri", options.redirectUri)
+        url.searchParams.set("response_type", options.responseType || "code")
+        url.searchParams.set("scope", options.scope || "openid profile email")
+        url.searchParams.set("state", options.state)
+        url.searchParams.set("code_challenge", options.codeChallenge)
+        url.searchParams.set("code_challenge_method", options.codeChallengeMethod || "S256")
+
+        return url.toString()
     }
 
     /**
