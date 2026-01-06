@@ -26,7 +26,7 @@ describe("AuthlyClient", () => {
         assert.strictEqual(url.searchParams.get("scope"), "openid profile email")
         assert.strictEqual(url.searchParams.get("state"), "test-state")
         assert.strictEqual(url.searchParams.get("code_challenge"), "test-challenge")
-        assert.strictEqual(url.searchParams.get("code_challenge_method"), "S256")
+        assert.strictEqual(url.searchParams.get("code_challenge_method"), "s256")
     })
 
     it("should allow overriding default authorize path", () => {

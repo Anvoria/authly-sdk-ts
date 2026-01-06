@@ -104,7 +104,7 @@ export class AuthlyClient {
         url.searchParams.set("scope", options.scope || "openid profile email")
         url.searchParams.set("state", options.state)
         url.searchParams.set("code_challenge", options.codeChallenge)
-        url.searchParams.set("code_challenge_method", options.codeChallengeMethod || "S256")
+        url.searchParams.set("code_challenge_method", options.codeChallengeMethod || "s256")
 
         return url.toString()
     }
