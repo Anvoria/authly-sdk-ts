@@ -14,6 +14,7 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
+        "declaration": true,
         "outDir": "./dist",
         "rootDir": "./src",
         "types": ["node", "bun"],
