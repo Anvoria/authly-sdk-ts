@@ -41,7 +41,7 @@
         "test": "tsx --test tests/**/*.test.ts",
         "test:watch": "tsx --test --watch tests/**/*.test.ts",
         "prepublishOnly": "bun run build",
-        "prepare": "husky"
+        "prepare": "bunx husky"
     },
     "lint-staged": {
         "*.{ts,json,jsonc,md}": [
