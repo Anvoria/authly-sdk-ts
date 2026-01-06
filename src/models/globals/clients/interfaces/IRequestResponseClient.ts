@@ -1,9 +1,26 @@
 /**
+ * Represents the error structure from the backend.
+ */
+interface APIError {
+    /**
+     * The error code.
+     */
+    readonly code: string
+    /**
+     * The error message.
+     */
+    readonly message: string
+    /**
+     * Optional error details.
+     */
+    readonly details?: unknown
+}
+
+/**
  * Represents the response from a request.
  * @template D - The type of the data returned from the request.
- * @template E - The type of the error returned from the request.
  */
-type IRequestResponseClient<D, E> =
+type IRequestResponseClient<D> =
     | {
           /**
            * Whether the request was successful.
@@ -12,16 +29,11 @@ type IRequestResponseClient<D, E> =
           /**
            * The data returned from the request.
            */
-          readonly data: {
-              /**
-               * The status code of the response.
-               */
-              readonly status: number
-              /**
-               * The data returned from the request.
-               */
-              readonly data: D
-          }
+          readonly data: D
+          /**
+           * The message returned from the request.
+           */
+          readonly message: string
       }
     | {
           /**
@@ -31,7 +43,7 @@ type IRequestResponseClient<D, E> =
           /**
            * The error returned from the request.
            */
-          readonly error: E | Error
+          readonly error: APIError
       }
 
-export type { IRequestResponseClient }
+export type { IRequestResponseClient, APIError }

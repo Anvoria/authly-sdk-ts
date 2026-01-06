@@ -1,7 +1,7 @@
 {
     "name": "@authly/sdk",
     "description": "A library for building authentication systems using Authly.",
-    "version": "1.0.0",
+    "version": "1.1.1",
     "author": {
         "name": "Anvoria",
         "url": "https://github.com/Anvoria"
@@ -9,11 +9,11 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Anvoria/authly-sdk.git"
+        "url": "git+https://github.com/Anvoria/authly-sdk-ts.git"
     },
-    "homepage": "https://github.com/Anvoria/authly-sdk",
+    "homepage": "https://github.com/Anvoria/authly-sdk-ts",
     "bugs": {
-        "url": "https://github.com/Anvoria/authly-sdk/issues"
+        "url": "https://github.com/Anvoria/authly-sdk-ts/issues"
     },
     "keywords": [
         "authentication",
@@ -30,13 +30,18 @@
     "files": [
         "dist"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
+        "build": "tsc",
         "format": "bunx prettier --write .",
         "lint": "bunx eslint .",
         "lint:fix": "bunx eslint --fix .",
         "test": "tsx --test tests/**/*.test.ts",
         "test:watch": "tsx --test --watch tests/**/*.test.ts",
-        "prepare": "husky"
+        "prepublishOnly": "bun run build",
+        "prepare": "bunx husky"
     },
     "lint-staged": {
         "*.{ts,json,jsonc,md}": [
@@ -62,5 +67,8 @@
         "tsx": "^4.21.0",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.50.0"
+    },
+    "dependencies": {
+        "jose": "^6.1.3"
     }
 }

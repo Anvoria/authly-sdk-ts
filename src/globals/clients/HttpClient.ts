@@ -7,46 +7,45 @@ class HttpClient {
     private constructor() {}
 
     /**
+     * Makes an HTTP request to the specified URL.
+     * @param url - The URL to make the request to.
+     * @param options - The options for the request.
+     * @returns A promise that resolves to the response data.
+     */
+    private static async request<D>(url: string, options: RequestInit): Promise<IRequestResponseClient<D>> {
+        try {
+            const response: Response = await fetch(url, {
+                ...options,
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    ...options.headers,
+                },
+            })
+
+            return (await response.json()) as IRequestResponseClient<D>
+        } catch (error: unknown) {
+            return {
+                success: false,
+                error: {
+                    code: "UNKNOWN_ERROR",
+                    message: error instanceof Error ? error.message : "An unknown error occurred.",
+                },
+            }
+        }
+    }
+
+    /**
      * Makes a GET request to the specified URL.
      * @param url - The URL to make the request to.
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
      */
-    public static async get<D, E>(
-        url: string,
-        options: Omit<RequestInit, "method">,
-    ): Promise<IRequestResponseClient<D, E>> {
-        try {
-            const response: Response = await fetch(url, {
-                ...options,
-                method: "GET",
-                headers: {
-                    ...options.headers,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-            })
-
-            if (response.ok) {
-                return {
-                    success: true,
-                    data: {
-                        status: response.status,
-                        data: await response.json(),
-                    },
-                }
-            }
-
-            return {
-                success: false,
-                error: new Error("Request failed."),
-            }
-        } catch (error: unknown) {
-            return {
-                success: false,
-                error: error as E,
-            }
-        }
+    public static async get<D>(url: string, options?: Omit<RequestInit, "method">): Promise<IRequestResponseClient<D>> {
+        return this.request<D>(url, {
+            ...options,
+            method: "GET",
+        })
     }
 
     /**
@@ -55,41 +54,14 @@ class HttpClient {
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
      */
-    public static async post<D, E>(
+    public static async post<D>(
         url: string,
-        options: Omit<RequestInit, "method">,
-    ): Promise<IRequestResponseClient<D, E>> {
-        try {
-            const response: Response = await fetch(url, {
-                ...options,
-                method: "POST",
-                headers: {
-                    ...options.headers,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-            })
-
-            if (response.ok) {
-                return {
-                    success: true,
-                    data: {
-                        status: response.status,
-                        data: await response.json(),
-                    },
-                }
-            }
-
-            return {
-                success: false,
-                error: new Error("Request failed."),
-            }
-        } catch (error: unknown) {
-            return {
-                success: false,
-                error: error as E,
-            }
-        }
+        options?: Omit<RequestInit, "method">,
+    ): Promise<IRequestResponseClient<D>> {
+        return this.request<D>(url, {
+            ...options,
+            method: "POST",
+        })
     }
 
     /**
@@ -98,41 +70,11 @@ class HttpClient {
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
      */
-    public static async put<D, E>(
-        url: string,
-        options: Omit<RequestInit, "method">,
-    ): Promise<IRequestResponseClient<D, E>> {
-        try {
-            const response: Response = await fetch(url, {
-                ...options,
-                method: "PUT",
-                headers: {
-                    ...options.headers,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-            })
-
-            if (response.ok) {
-                return {
-                    success: true,
-                    data: {
-                        status: response.status,
-                        data: await response.json(),
-                    },
-                }
-            }
-
-            return {
-                success: false,
-                error: new Error("Request failed."),
-            }
-        } catch (error: unknown) {
-            return {
-                success: false,
-                error: error as E,
-            }
-        }
+    public static async put<D>(url: string, options?: Omit<RequestInit, "method">): Promise<IRequestResponseClient<D>> {
+        return this.request<D>(url, {
+            ...options,
+            method: "PUT",
+        })
     }
 
     /**
@@ -141,41 +83,14 @@ class HttpClient {
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
      */
-    public static async patch<D, E>(
+    public static async patch<D>(
         url: string,
-        options: Omit<RequestInit, "method">,
-    ): Promise<IRequestResponseClient<D, E>> {
-        try {
-            const response: Response = await fetch(url, {
-                ...options,
-                method: "PATCH",
-                headers: {
-                    ...options.headers,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-            })
-
-            if (response.ok) {
-                return {
-                    success: true,
-                    data: {
-                        status: response.status,
-                        data: await response.json(),
-                    },
-                }
-            }
-
-            return {
-                success: false,
-                error: new Error("Request failed."),
-            }
-        } catch (error: unknown) {
-            return {
-                success: false,
-                error: error as E,
-            }
-        }
+        options?: Omit<RequestInit, "method">,
+    ): Promise<IRequestResponseClient<D>> {
+        return this.request<D>(url, {
+            ...options,
+            method: "PATCH",
+        })
     }
 
     /**
@@ -184,41 +99,14 @@ class HttpClient {
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
      */
-    public static async delete<D, E>(
+    public static async delete<D>(
         url: string,
-        options: Omit<RequestInit, "method">,
-    ): Promise<IRequestResponseClient<D, E>> {
-        try {
-            const response: Response = await fetch(url, {
-                ...options,
-                method: "DELETE",
-                headers: {
-                    ...options.headers,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-            })
-
-            if (response.ok) {
-                return {
-                    success: true,
-                    data: {
-                        status: response.status,
-                        data: await response.json(),
-                    },
-                }
-            }
-
-            return {
-                success: false,
-                error: new Error("Request failed."),
-            }
-        } catch (error: unknown) {
-            return {
-                success: false,
-                error: error as E,
-            }
-        }
+        options?: Omit<RequestInit, "method">,
+    ): Promise<IRequestResponseClient<D>> {
+        return this.request<D>(url, {
+            ...options,
+            method: "DELETE",
+        })
     }
 }
 
