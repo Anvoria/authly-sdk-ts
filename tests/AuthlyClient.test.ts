@@ -19,7 +19,7 @@ describe("AuthlyClient", () => {
 
         const url = new URL(authorizeUrl)
         assert.strictEqual(url.origin, "https://auth.example.com")
-        assert.strictEqual(url.pathname, "/v1/oauth/authorize")
+        assert.strictEqual(url.pathname, "/authorize")
         assert.strictEqual(url.searchParams.get("client_id"), "test-service-id")
         assert.strictEqual(url.searchParams.get("redirect_uri"), "https://app.example.com/callback")
         assert.strictEqual(url.searchParams.get("response_type"), "code")
