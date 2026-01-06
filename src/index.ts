@@ -1,3 +1,3 @@
-export * from "./types/Claims"
+export * from "./models/Claims"
 export * from "./exceptions"
-export * from "./AuthlyClient"
+export * from "./globals/clients/AuthlyClient"

@@ -1,7 +1,7 @@
 import { describe, it, before } from "node:test"
 import assert from "node:assert"
 import { generateKeyPair, SignJWT } from "jose"
-import { JWTVerifier } from "../src/tokens/JWTVerifier"
+import { JWTVerifier } from "../src/globals/clients/internal/JWTVerifier"
 import { TokenExpiredError, TokenInvalidError } from "../src/exceptions"
 
 describe("JWTVerifier", () => {

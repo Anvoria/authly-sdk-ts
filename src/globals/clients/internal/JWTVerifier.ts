@@ -1,8 +1,8 @@
 import { createRemoteJWKSet, jwtVerify } from "jose"
 import type { JWTVerifyGetKey, JWTVerifyOptions } from "jose"
-import { DEFAULT_ALGORITHMS } from "../config"
-import { TokenExpiredError, TokenInvalidError } from "../exceptions"
-import type { Claims } from "../types/Claims"
+import { DEFAULT_ALGORITHMS } from "../../../config"
+import { TokenExpiredError, TokenInvalidError } from "../../../exceptions"
+import type { Claims } from "../../../models/Claims"
 
 /**
  * Internal class for verifying JWT tokens using jose.

@@ -1,6 +1,6 @@
-import { DEFAULT_JWKS_PATH } from "./config"
-import { JWTVerifier } from "./tokens/JWTVerifier"
-import type { Claims } from "./types/Claims"
+import { DEFAULT_JWKS_PATH } from "../../config"
+import { JWTVerifier } from "./internal/JWTVerifier"
+import type { Claims } from "../../models/Claims"
 
 /**
  * Options for initializing the AuthlyClient.
