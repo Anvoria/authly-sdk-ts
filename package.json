@@ -9,11 +9,11 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Anvoria/authly-sdk.git"
+        "url": "https://github.com/Anvoria/authly-sdk-ts.git"
     },
-    "homepage": "https://github.com/Anvoria/authly-sdk",
+    "homepage": "https://github.com/Anvoria/authly-sdk-ts",
     "bugs": {
-        "url": "https://github.com/Anvoria/authly-sdk/issues"
+        "url": "https://github.com/Anvoria/authly-sdk-ts/issues"
     },
     "keywords": [
         "authentication",
