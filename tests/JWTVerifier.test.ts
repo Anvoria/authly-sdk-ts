@@ -1,22 +1,21 @@
 import { describe, it, before } from "node:test"
 import assert from "node:assert"
-import { generateKeyPair, SignJWT } from "jose"
-import { JWTVerifier } from "../src/globals/clients/internal/JWTVerifier"
-import { TokenExpiredError, TokenInvalidError } from "../src/exceptions"
+import { generateKeyPair, type GenerateKeyPairResult, SignJWT } from "jose"
+import { JWTVerifier } from "../src/globals/internal/JWTVerifier"
+import { AuthlyTokenExpiredError } from "../src/models/builders/process-errors/tokens/AuthlyTokenExpiredError"
+import { AuthlyTokenInvalidError } from "../src/models/builders/process-errors/tokens/AuthlyTokenInvalidError"
+import type { KeyType } from "./models/types/KeyType"
+import type { IDecodedTokenClaim } from "../src/models/globals/clients/interfaces/IDecodedTokenClaim"
 
 describe("JWTVerifier", () => {
-    type Key = Awaited<ReturnType<typeof generateKeyPair>>["publicKey"]
-    let privateKey: Key
-    let publicKey: Key
-    let verifier: JWTVerifier
-    const issuer = "https://auth.example.com"
-    const audience = "test-audience"
+    let privateKey: KeyType, publicKey: KeyType, verifier: JWTVerifier
+    const issuer: string = "https://auth.example.com"
+    const audience: string = "test-audience"
 
-    before(async () => {
-        const keys = await generateKeyPair("RS256")
+    before(async (): Promise<void> => {
+        const keys: GenerateKeyPairResult = await generateKeyPair("RS256")
         privateKey = keys.privateKey
         publicKey = keys.publicKey
-
         verifier = new JWTVerifier({
             issuer,
             audience,
@@ -25,8 +24,8 @@ describe("JWTVerifier", () => {
         })
     })
 
-    it("should successfully verify a valid token", async () => {
-        const token = await new SignJWT({
+    it("Should successfully verify a valid token", async (): Promise<void> => {
+        const token: string = await new SignJWT({
             sub: "user123",
             sid: "session123",
             permissions: { read: 1 },
@@ -38,16 +37,15 @@ describe("JWTVerifier", () => {
             .setExpirationTime("1h")
             .sign(privateKey)
 
-        const claims = await verifier.verify(token)
-
+        const claims: IDecodedTokenClaim = await verifier.verify(token)
         assert.strictEqual(claims.sub, "user123")
         assert.strictEqual(claims.sid, "session123")
         assert.strictEqual(claims.iss, issuer)
         assert.deepStrictEqual(claims.aud, audience)
     })
 
-    it("should throw TokenExpiredError for expired token", async () => {
-        const token = await new SignJWT({ sub: "user123" })
+    it("Should throw AuthlyTokenExpiredError for expired token", async (): Promise<void> => {
+        const token: string = await new SignJWT({ sub: "user123" })
             .setProtectedHeader({ alg: "RS256" })
             .setIssuedAt()
             .setIssuer(issuer)
@@ -56,13 +54,14 @@ describe("JWTVerifier", () => {
             .sign(privateKey)
 
         await assert.rejects(
-            async () => await verifier.verify(token),
-            (err) => err instanceof TokenExpiredError && err.message === "Token has expired",
+            async (): Promise<IDecodedTokenClaim> => await verifier.verify(token),
+            (err: unknown): err is AuthlyTokenExpiredError =>
+                err instanceof AuthlyTokenExpiredError && err.message === "Token has expired",
         )
     })
 
-    it("should throw TokenInvalidError for invalid audience", async () => {
-        const token = await new SignJWT({ sub: "user123" })
+    it("Should throw AuthlyTokenInvalidError for invalid audience", async (): Promise<void> => {
+        const token: string = await new SignJWT({ sub: "user123" })
             .setProtectedHeader({ alg: "RS256" })
             .setIssuedAt()
             .setIssuer(issuer)
@@ -71,13 +70,14 @@ describe("JWTVerifier", () => {
             .sign(privateKey)
 
         await assert.rejects(
-            async () => await verifier.verify(token),
-            (err) => err instanceof TokenInvalidError && err.message.includes("aud"),
+            async (): Promise<IDecodedTokenClaim> => await verifier.verify(token),
+            (err: unknown): err is AuthlyTokenInvalidError =>
+                err instanceof AuthlyTokenInvalidError && err.message.includes("aud"),
         )
     })
 
-    it("should throw TokenInvalidError for invalid issuer", async () => {
-        const token = await new SignJWT({ sub: "user123" })
+    it("Should throw AuthlyTokenInvalidError for invalid issuer", async (): Promise<void> => {
+        const token: string = await new SignJWT({ sub: "user123" })
             .setProtectedHeader({ alg: "RS256" })
             .setIssuedAt()
             .setIssuer("https://wrong.com")
@@ -86,15 +86,15 @@ describe("JWTVerifier", () => {
             .sign(privateKey)
 
         await assert.rejects(
-            async () => await verifier.verify(token),
-            (err) => err instanceof TokenInvalidError && err.message.includes("iss"),
+            async (): Promise<IDecodedTokenClaim> => await verifier.verify(token),
+            (err: unknown): err is AuthlyTokenInvalidError =>
+                err instanceof AuthlyTokenInvalidError && err.message.includes("iss"),
         )
     })
 
-    it("should throw TokenInvalidError for wrong signature", async () => {
-        const otherKeys = await generateKeyPair("RS256")
-
-        const token = await new SignJWT({ sub: "user123" })
+    it("Should throw AuthlyTokenInvalidError for wrong signature", async (): Promise<void> => {
+        const otherKeys: GenerateKeyPairResult = await generateKeyPair("RS256")
+        const token: string = await new SignJWT({ sub: "user123" })
             .setProtectedHeader({ alg: "RS256" })
             .setIssuedAt()
             .setIssuer(issuer)
@@ -103,8 +103,9 @@ describe("JWTVerifier", () => {
             .sign(otherKeys.privateKey)
 
         await assert.rejects(
-            async () => await verifier.verify(token),
-            (err) => err instanceof TokenInvalidError && err.message.includes("signature"),
+            async (): Promise<IDecodedTokenClaim> => await verifier.verify(token),
+            (err: unknown): err is AuthlyTokenInvalidError =>
+                err instanceof AuthlyTokenInvalidError && err.message.includes("signature"),
         )
     })
 })

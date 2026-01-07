@@ -1,15 +1,16 @@
 import { describe, it } from "node:test"
 import assert from "node:assert"
 import { AuthlyClient } from "../src/globals/clients/AuthlyClient"
+import type { IAuthlyClientOptions } from "../src/models/globals/clients/interfaces/IAuthlyClientOptions"
 
 describe("AuthlyClient", () => {
-    const options = {
+    const options: IAuthlyClientOptions = {
         issuer: "https://auth.example.com",
         audience: "test-audience",
         serviceId: "test-service-id",
     }
 
-    it("should generate a correct authorization URL with default values", () => {
+    it("Should generate a correct authorization URL with default values", () => {
         const client = new AuthlyClient(options)
         const authorizeUrl = client.getAuthorizeUrl({
             redirectUri: "https://app.example.com/callback",
