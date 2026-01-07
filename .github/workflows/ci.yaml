@@ -13,7 +13,11 @@ on:
 
 defaults:
     run:
+        working-directory: .
         shell: bash
+
+permissions:
+    contents: read
 
 jobs:
     validate-bun:
