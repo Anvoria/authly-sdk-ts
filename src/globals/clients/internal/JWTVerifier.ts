@@ -1,54 +1,62 @@
 import { createRemoteJWKSet, jwtVerify } from "jose"
-import type { JWTVerifyGetKey, JWTVerifyOptions } from "jose"
-import type { Claims } from "../../../models/Claims"
+import type { JWTVerifyGetKey } from "jose"
+import type { IDecodedTokenClaim } from "../../../models/globals/clients/interfaces/IDecodedTokenClaim"
 import { AuthlyTokenExpiredError } from "../../../models/builders/process-errors/tokens/AuthlyTokenExpiredError"
 import { AuthlyTokenInvalidError } from "../../../models/builders/process-errors/tokens/AuthlyTokenInvalidError"
 import { AuthlyConfiguration } from "../../../AuthlyConfiguration"
+import type { IJWTVerifierOptions } from "../../../models/globals/clients/internal/interfaces/IJWTVerifierOptions"
 
 /**
- * Internal class for verifying JWT tokens using jose.
+ * @summary Internal class for verifying JWT tokens using jose.
  */
 export class JWTVerifier {
+    /**
+     * @summary The issuer of the token.
+     */
     private readonly issuer: string
+    /**
+     * @summary The audience of the token.
+     */
     private readonly audience: string
+    /**
+     * @summary The algorithms to use for the token.
+     */
     private readonly algorithms: string[]
+    /**
+     * @summary The JWKS to use for the token.
+     */
     private readonly JWKS: JWTVerifyGetKey
 
-    constructor(params: {
-        issuer: string
-        audience: string
-        jwksUrl: string
-        algorithms?: string[]
-        jwks?: JWTVerifyGetKey
-    }) {
+    /**
+     * @summary Constructs a new JWTVerifier.
+     * @param params - The options for the JWTVerifier.
+     */
+    public constructor(params: IJWTVerifierOptions) {
         this.issuer = params.issuer
         this.audience = params.audience
         this.algorithms = params.algorithms || (AuthlyConfiguration.DEFAULT_ALGORITHMS as string[])
-
         this.JWKS = params.jwks || createRemoteJWKSet(new URL(params.jwksUrl))
     }
 
     /**
-     * Verify the JWT token and return its claims.
+     * @summary Verify the JWT token and return its claims.
      * @param token - The encoded JWT token string.
      * @returns The decoded claims from the token.
      * @throws {AuthlyTokenExpiredError} If the token's exp claim is in the past.
      * @throws {AuthlyTokenInvalidError} If the token is otherwise invalid.
      */
-    public async verify(token: string): Promise<Claims> {
+    public async verify(token: string): Promise<IDecodedTokenClaim> {
         try {
-            const options: JWTVerifyOptions = {
+            const { payload }: Readonly<{ payload: IDecodedTokenClaim }> = await jwtVerify(token, this.JWKS, {
                 issuer: this.issuer,
                 audience: this.audience,
                 algorithms: this.algorithms,
-            }
+            })
 
-            const { payload } = await jwtVerify(token, this.JWKS, options)
-
-            return payload as unknown as Claims
+            return payload
         } catch (error: unknown) {
             if (error instanceof Error) {
-                const code = (error as { code?: string }).code
+                const code: string | undefined = (error as { code?: string }).code
 
                 if (code === "ERR_JWT_EXPIRED") {
                     throw new AuthlyTokenExpiredError("Token has expired")

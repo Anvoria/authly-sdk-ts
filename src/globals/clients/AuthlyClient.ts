@@ -1,8 +1,8 @@
 import { JWTVerifier } from "./internal/JWTVerifier"
-import type { Claims } from "../../models/Claims"
 import { AuthlyConfiguration } from "../../AuthlyConfiguration"
 import type { IAuthlyClientOptions } from "../../models/globals/clients/interfaces/IAuthlyClientOptions"
 import type { IAuthorizeUrlOptions } from "../../models/globals/clients/interfaces/IAuthorizeUrlOptions"
+import { IDecodedTokenClaim } from "../../models/globals/clients/interfaces/IDecodedTokenClaim"
 
 /**
  * @summary A client for interacting with Authly.
@@ -58,7 +58,7 @@ class AuthlyClient {
      * @throws {AuthlyTokenExpiredError} If the token has expired.
      * @throws {AuthlyTokenInvalidError} If the token is invalid (e.g., bad signature, invalid audience).
      */
-    public async verify(token: string): Promise<Claims> {
+    public async verify(token: string): Promise<IDecodedTokenClaim> {
         return this.verifier.verify(token)
     }
 }
