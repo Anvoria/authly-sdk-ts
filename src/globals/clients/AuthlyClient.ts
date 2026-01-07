@@ -1,6 +1,6 @@
-import { DEFAULT_AUTHORIZE_PATH, DEFAULT_JWKS_PATH } from "../../config"
 import { JWTVerifier } from "./internal/JWTVerifier"
 import type { Claims } from "../../models/Claims"
+import { AuthlyConfiguration } from "../../AuthlyConfiguration"
 
 /**
  * Options for initializing the AuthlyClient.
@@ -78,8 +78,8 @@ export class AuthlyClient {
     constructor(options: AuthlyClientOptions) {
         this.issuer = options.issuer.replace(/\/$/, "")
         this.serviceId = options.serviceId
-        const jwksPath = options.jwksPath || DEFAULT_JWKS_PATH
-        this.authorizePath = options.authorizePath || DEFAULT_AUTHORIZE_PATH
+        const jwksPath = options.jwksPath || AuthlyConfiguration.DEFAULT_JWKS_PATH
+        this.authorizePath = options.authorizePath || AuthlyConfiguration.DEFAULT_AUTHORIZE_PATH
 
         this.verifier = new JWTVerifier({
             issuer: this.issuer,
@@ -117,8 +117,8 @@ export class AuthlyClient {
      *
      * @param token - The encoded JWT token string.
      * @returns A promise that resolves to the token claims (e.g., sub, iss, aud).
-     * @throws {TokenExpiredError} If the token has expired.
-     * @throws {TokenInvalidError} If the token is invalid (e.g., bad signature, invalid audience).
+     * @throws {AuthlyTokenExpiredError} If the token has expired.
+     * @throws {AuthlyTokenInvalidError} If the token is invalid (e.g., bad signature, invalid audience).
      */
     public async verify(token: string): Promise<Claims> {
         return this.verifier.verify(token)

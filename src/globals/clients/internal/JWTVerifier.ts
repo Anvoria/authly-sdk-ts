@@ -1,9 +1,9 @@
 import { createRemoteJWKSet, jwtVerify } from "jose"
 import type { JWTVerifyGetKey, JWTVerifyOptions } from "jose"
-import { DEFAULT_ALGORITHMS } from "../../../config"
 import type { Claims } from "../../../models/Claims"
 import { AuthlyTokenExpiredError } from "../../../models/builders/process-errors/tokens/AuthlyTokenExpiredError"
 import { AuthlyTokenInvalidError } from "../../../models/builders/process-errors/tokens/AuthlyTokenInvalidError"
+import { AuthlyConfiguration } from "../../../AuthlyConfiguration"
 
 /**
  * Internal class for verifying JWT tokens using jose.
@@ -23,7 +23,7 @@ export class JWTVerifier {
     }) {
         this.issuer = params.issuer
         this.audience = params.audience
-        this.algorithms = params.algorithms || DEFAULT_ALGORITHMS
+        this.algorithms = params.algorithms || (AuthlyConfiguration.DEFAULT_ALGORITHMS as string[])
 
         this.JWKS = params.jwks || createRemoteJWKSet(new URL(params.jwksUrl))
     }
