@@ -1,13 +1,13 @@
 import type { IRequestResponseClient } from "../../models/globals/clients/interfaces/IRequestResponseClient"
 
 /**
- * A class that provides a static method for making HTTP requests.
+ * @summary A class that provides a static method for making HTTP requests.
  */
 class HttpClient {
     private constructor() {}
 
     /**
-     * Makes an HTTP request to the specified URL.
+     * @summary Makes an HTTP request to the specified URL.
      * @param url - The URL to make the request to.
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
@@ -36,7 +36,7 @@ class HttpClient {
     }
 
     /**
-     * Makes a GET request to the specified URL.
+     * @summary Makes a GET request to the specified URL.
      * @param url - The URL to make the request to.
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
@@ -49,7 +49,7 @@ class HttpClient {
     }
 
     /**
-     * Makes a POST request to the specified URL.
+     * @summary Makes a POST request to the specified URL.
      * @param url - The URL to make the request to.
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
@@ -65,7 +65,7 @@ class HttpClient {
     }
 
     /**
-     * Makes a PUT request to the specified URL.
+     * @summary Makes a PUT request to the specified URL.
      * @param url - The URL to make the request to.
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
@@ -78,7 +78,7 @@ class HttpClient {
     }
 
     /**
-     * Makes a PATCH request to the specified URL.
+     * @summary Makes a PATCH request to the specified URL.
      * @param url - The URL to make the request to.
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
@@ -94,7 +94,7 @@ class HttpClient {
     }
 
     /**
-     * Makes a DELETE request to the specified URL.
+     * @summary Makes a DELETE request to the specified URL.
      * @param url - The URL to make the request to.
      * @param options - The options for the request.
      * @returns A promise that resolves to the response data.
