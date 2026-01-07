@@ -1,10 +1,10 @@
 import { createRemoteJWKSet, jwtVerify } from "jose"
 import type { JWTVerifyGetKey } from "jose"
-import type { IDecodedTokenClaim } from "../../../models/globals/clients/interfaces/IDecodedTokenClaim"
-import { AuthlyTokenExpiredError } from "../../../models/builders/process-errors/tokens/AuthlyTokenExpiredError"
-import { AuthlyTokenInvalidError } from "../../../models/builders/process-errors/tokens/AuthlyTokenInvalidError"
-import { AuthlyConfiguration } from "../../../AuthlyConfiguration"
-import type { IJWTVerifierOptions } from "../../../models/globals/clients/internal/interfaces/IJWTVerifierOptions"
+import type { IDecodedTokenClaim } from "../../models/globals/clients/interfaces/IDecodedTokenClaim"
+import { AuthlyTokenExpiredError } from "../../models/builders/process-errors/tokens/AuthlyTokenExpiredError"
+import { AuthlyTokenInvalidError } from "../../models/builders/process-errors/tokens/AuthlyTokenInvalidError"
+import { AuthlyConfiguration } from "../configuration/AuthlyConfiguration"
+import type { IJWTVerifierOptions } from "../../models/globals/clients/internal/interfaces/IJWTVerifierOptions"
 
 /**
  * @summary Internal class for verifying JWT tokens using jose.

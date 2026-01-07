@@ -1,5 +1,5 @@
-import { JWTVerifier } from "./internal/JWTVerifier"
-import { AuthlyConfiguration } from "../../AuthlyConfiguration"
+import { JWTVerifier } from "../internal/JWTVerifier"
+import { AuthlyConfiguration } from "../configuration/AuthlyConfiguration"
 import type { IAuthlyClientOptions } from "../../models/globals/clients/interfaces/IAuthlyClientOptions"
 import type { IAuthorizeUrlOptions } from "../../models/globals/clients/interfaces/IAuthorizeUrlOptions"
 import type { IDecodedTokenClaim } from "../../models/globals/clients/interfaces/IDecodedTokenClaim"

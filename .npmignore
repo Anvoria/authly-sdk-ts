@@ -7,9 +7,10 @@
 # Libraries.
 /node_modules/
 
-# Build files.
-/dist/
+# Source files and tests.
+/src/
+/tests/
 
 # Operating system files.
-/**/*.DS_Store
 /**/*.ini
+/**/*.DS_Store
