@@ -9,7 +9,7 @@ import type { IJWTVerifierOptions } from "../../../models/globals/clients/intern
 /**
  * @summary Internal class for verifying JWT tokens using jose.
  */
-export class JWTVerifier {
+class JWTVerifier {
     /**
      * @summary The issuer of the token.
      */
@@ -76,3 +76,5 @@ export class JWTVerifier {
         }
     }
 }
+
+export { JWTVerifier }

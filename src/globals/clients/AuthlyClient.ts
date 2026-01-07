@@ -2,7 +2,7 @@ import { JWTVerifier } from "./internal/JWTVerifier"
 import { AuthlyConfiguration } from "../../AuthlyConfiguration"
 import type { IAuthlyClientOptions } from "../../models/globals/clients/interfaces/IAuthlyClientOptions"
 import type { IAuthorizeUrlOptions } from "../../models/globals/clients/interfaces/IAuthorizeUrlOptions"
-import { IDecodedTokenClaim } from "../../models/globals/clients/interfaces/IDecodedTokenClaim"
+import type { IDecodedTokenClaim } from "../../models/globals/clients/interfaces/IDecodedTokenClaim"
 
 /**
  * @summary A client for interacting with Authly.
@@ -11,21 +11,35 @@ import { IDecodedTokenClaim } from "../../models/globals/clients/interfaces/IDec
  * starting the OAuth2 flow.
  */
 class AuthlyClient {
+    /**
+     * @summary The JWT verifier for the client.
+     */
     private readonly verifier: JWTVerifier
+    /**
+     * @summary The service ID of the client.
+     */
     private readonly serviceId: string
+    /**
+     * @summary The issuer of the client.
+     */
     private readonly issuer: string
+    /**
+     * @summary The authorize path of the client.
+     */
     private readonly authorizePath: string
 
-    constructor(options: IAuthlyClientOptions) {
+    /**
+     * @summary Constructs a new AuthlyClient.
+     * @param options - The options for the client.
+     */
+    public constructor(options: IAuthlyClientOptions) {
         this.issuer = options.issuer.replace(/\/$/, "")
         this.serviceId = options.serviceId
-        const jwksPath = options.jwksPath || AuthlyConfiguration.DEFAULT_JWKS_PATH
         this.authorizePath = options.authorizePath || AuthlyConfiguration.DEFAULT_AUTHORIZE_PATH
-
         this.verifier = new JWTVerifier({
             issuer: this.issuer,
             audience: options.audience,
-            jwksUrl: `${this.issuer}${jwksPath}`,
+            jwksUrl: `${this.issuer}${options.jwksPath || AuthlyConfiguration.DEFAULT_JWKS_PATH}`,
             algorithms: options.algorithms,
         })
     }
