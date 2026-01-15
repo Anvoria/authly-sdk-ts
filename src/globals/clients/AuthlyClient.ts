@@ -27,19 +27,23 @@ class AuthlyClient {
      */
     private readonly serviceId: string
     /**
-     * @summary The issuer of the client.
+     * @summary The issuer of the client (for validation).
      */
     private readonly issuer: string
     /**
-     * @summary The authorize path of the client.
+     * @summary The base URL for API requests.
+     */
+    private readonly baseUrl: string
+    /**
+     * @summary The authorize path.
      */
     private readonly authorizePath: string
     /**
-     * @summary The token path of the client.
+     * @summary The token path.
      */
     private readonly tokenPath: string
     /**
-     * @summary The user info path of the client.
+     * @summary The user info path.
      */
     private readonly userInfoPath: string
     /**
@@ -61,6 +65,9 @@ class AuthlyClient {
      */
     public constructor(options: IAuthlyClientOptions) {
         this.issuer = options.issuer.replace(/\/$/, "")
+        // Use baseUrl if provided, otherwise fallback to issuer
+        this.baseUrl = (options.baseUrl || this.issuer).replace(/\/$/, "")
+
         this.serviceId = options.serviceId
         this.authorizePath = options.authorizePath || AuthlyConfiguration.DEFAULT_AUTHORIZE_PATH
         this.tokenPath = options.tokenPath || AuthlyConfiguration.DEFAULT_TOKEN_PATH
@@ -75,7 +82,7 @@ class AuthlyClient {
         this.verifier = new JWTVerifier({
             issuer: this.issuer,
             audience: options.audience,
-            jwksUrl: `${this.issuer}${options.jwksPath || AuthlyConfiguration.DEFAULT_JWKS_PATH}`,
+            jwksUrl: `${this.baseUrl}${options.jwksPath || AuthlyConfiguration.DEFAULT_JWKS_PATH}`,
             algorithms: options.algorithms,
         })
     }
@@ -116,7 +123,7 @@ class AuthlyClient {
      * @returns The full authorization URL.
      */
     public getAuthorizeUrl(options: IAuthorizeUrlOptions): string {
-        const url = new URL(`${this.issuer}${this.authorizePath}`)
+        const url = new URL(`${this.baseUrl}${this.authorizePath}`)
 
         url.searchParams.set("client_id", this.serviceId)
         url.searchParams.set("redirect_uri", options.redirectUri)
@@ -203,7 +210,7 @@ class AuthlyClient {
      * @returns A promise that resolves to the new access token.
      */
     public async refreshToken(refreshToken?: string): Promise<string | null> {
-        const url = `${this.issuer}${this.tokenPath}`
+        const url = `${this.baseUrl}${this.tokenPath}`
         const body: Record<string, string> = {
             grant_type: "refresh_token",
             client_id: this.serviceId,
@@ -238,7 +245,7 @@ class AuthlyClient {
         if (!token) return null
 
         const fetchInfo = async (currentBuffer: string) => {
-            return HttpClient.get<IUserProfile>(`${this.issuer}${this.userInfoPath}`, {
+            return HttpClient.get<IUserProfile>(`${this.baseUrl}${this.userInfoPath}`, {
                 headers: {
                     Authorization: `Bearer ${currentBuffer}`,
                 },
@@ -278,6 +285,7 @@ class AuthlyClient {
             const decoded = decodeJwt(token)
             if (!decoded.exp) return true
 
+            // Check if token is expired with a 10s buffer
             const now = Math.floor(Date.now() / 1000)
             return decoded.exp > now + 10
         } catch {
@@ -307,7 +315,7 @@ class AuthlyClient {
         redirectUri: string,
         codeVerifier?: string,
     ): Promise<ITokenResponse> {
-        const url = `${this.issuer}${this.tokenPath}`
+        const url = `${this.baseUrl}${this.tokenPath}`
         const body: Record<string, string> = {
             grant_type: "authorization_code",
             client_id: this.serviceId,

@@ -6,9 +6,16 @@ import type { IAuthlyStorage } from "./IAuthlyStorage"
 interface IAuthlyClientOptions {
     /**
      * @summary The base URL of the identity provider.
+     * @description Used for token validation (iss claim). If baseUrl is not provided, it is also used for API requests.
      * @example "https://auth.example.com"
      */
     readonly issuer: string
+    /**
+     * @summary The base URL for API requests (optional).
+     * @description Use this if your API is hosted on a different URL than the issuer (e.g. localhost vs production domain).
+     * @example "http://localhost:8000"
+     */
+    readonly baseUrl?: string
     /**
      * @summary The expected audience claim (aud) in the token.
      * @example "https://app.example.com"
@@ -30,25 +37,25 @@ interface IAuthlyClientOptions {
      */
     readonly storage?: IAuthlyStorage
     /**
-     * @summary The path to the JWKS endpoint relative to the issuer.
+     * @summary The path to the JWKS endpoint relative to the baseUrl.
      * @example "/.well-known/jwks.json"
      * @default "/.well-known/jwks.json"
      */
     readonly jwksPath?: string
     /**
-     * @summary The path to the authorize endpoint relative to the issuer.
+     * @summary The path to the authorize endpoint relative to the baseUrl.
      * @example "/v1/oauth/authorize"
-     * @default "/authorize"
+     * @default "/v1/oauth/authorize"
      */
     readonly authorizePath?: string
     /**
-     * @summary The path to the token endpoint relative to the issuer.
+     * @summary The path to the token endpoint relative to the baseUrl.
      * @example "/v1/oauth/token"
-     * @default "/oauth/token"
+     * @default "/v1/oauth/token"
      */
     readonly tokenPath?: string
     /**
-     * @summary The path to the user info endpoint relative to the issuer.
+     * @summary The path to the user info endpoint relative to the baseUrl.
      * @example "/v1/oauth/userinfo"
      * @default "/v1/oauth/userinfo"
      */
