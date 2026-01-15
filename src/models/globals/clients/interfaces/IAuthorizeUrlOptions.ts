@@ -19,9 +19,9 @@ interface IAuthorizeUrlOptions {
     readonly codeChallenge: string
     /**
      * @summary The PKCE code challenge method.
-     * @example "S256"
+     * @example "s256"
      */
-    readonly codeChallengeMethod?: "S256" | "plain"
+    readonly codeChallengeMethod?: "s256" | "plain"
     /**
      * @summary The requested scopes.
      * @example "openid profile email"

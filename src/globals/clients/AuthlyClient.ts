@@ -106,7 +106,7 @@ class AuthlyClient {
             ...options,
             state,
             codeChallenge,
-            codeChallengeMethod: "S256",
+            codeChallengeMethod: "s256",
         })
     }
 
