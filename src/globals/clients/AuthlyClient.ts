@@ -1,3 +1,4 @@
+import { decodeJwt } from "jose"
 import { JWTVerifier } from "../internal/JWTVerifier"
 import { HttpClient } from "../internal/HttpClient"
 import { PKCEUtils } from "../internal/PKCEUtils"
@@ -7,6 +8,7 @@ import type { IAuthorizeUrlOptions } from "../../models/globals/clients/interfac
 import type { IDecodedTokenClaim } from "../../models/globals/clients/interfaces/IDecodedTokenClaim"
 import type { ITokenResponse } from "../../models/globals/clients/interfaces/ITokenResponse"
 import type { IAuthlyStorage } from "../../models/globals/clients/interfaces/IAuthlyStorage"
+import type { IUserProfile } from "../../models/globals/clients/interfaces/IUserProfile"
 
 /**
  * @summary A client for interacting with Authly.
@@ -15,6 +17,7 @@ import type { IAuthlyStorage } from "../../models/globals/clients/interfaces/IAu
  * starting the OAuth2 flow.
  */
 class AuthlyClient {
+    private static readonly ACCESS_TOKEN_KEY = "authly_access_token"
     /**
      * @summary The JWT verifier for the client.
      */
@@ -36,6 +39,10 @@ class AuthlyClient {
      */
     private readonly tokenPath: string
     /**
+     * @summary The user info path of the client.
+     */
+    private readonly userInfoPath: string
+    /**
      * @summary The redirect URI for the client.
      */
     private readonly redirectUri?: string
@@ -43,6 +50,10 @@ class AuthlyClient {
      * @summary The storage implementation.
      */
     private readonly storage?: IAuthlyStorage
+    /**
+     * @summary Memory cache for the access token.
+     */
+    private accessToken: string | null = null
 
     /**
      * @summary Constructs a new AuthlyClient.
@@ -53,11 +64,12 @@ class AuthlyClient {
         this.serviceId = options.serviceId
         this.authorizePath = options.authorizePath || AuthlyConfiguration.DEFAULT_AUTHORIZE_PATH
         this.tokenPath = options.tokenPath || AuthlyConfiguration.DEFAULT_TOKEN_PATH
+        this.userInfoPath = options.userInfoPath || AuthlyConfiguration.DEFAULT_USER_INFO_PATH
         this.redirectUri = options.redirectUri
         this.storage = options.storage
 
         if (!this.storage && typeof window !== "undefined" && window.sessionStorage) {
-            this.storage = window.sessionStorage
+            this.storage = window.sessionStorage as unknown as IAuthlyStorage
         }
 
         this.verifier = new JWTVerifier({
@@ -90,7 +102,7 @@ class AuthlyClient {
         await this.storage.setItem("pkce_verifier", codeVerifier)
 
         return this.getAuthorizeUrl({
-            redirectUri: this.redirectUri!,
+            redirectUri: (options?.redirectUri || this.redirectUri)!,
             ...options,
             state,
             codeChallenge,
@@ -119,14 +131,8 @@ class AuthlyClient {
 
     /**
      * @summary Exchanges the authorization code for tokens using PKCE flow and state validation.
-     * @description This method performs the full OAuth2/OIDC code exchange flow:
-     * 1. Validates the state parameter against the stored state (anti-CSRF).
-     * 2. Retrieves the stored code verifier.
-     * 3. Exchanges the code for tokens.
-     * 4. Clears the stored state and verifier.
      * @param urlParams - The URLSearchParams containing 'code' and 'state'.
      * @returns A promise that resolves to the token response.
-     * @throws {Error} If state is invalid, code is missing, or storage is not configured.
      */
     public async exchangeToken(urlParams: URLSearchParams): Promise<ITokenResponse> {
         const code = urlParams.get("code")
@@ -156,10 +162,137 @@ class AuthlyClient {
 
         const tokenResponse = await this.exchangeCodeForToken(code, this.redirectUri, codeVerifier)
 
+        await this.setSession(tokenResponse)
+
+        // Clear temporary storage
         await this.storage.removeItem("pkce_state")
         await this.storage.removeItem("pkce_verifier")
 
         return tokenResponse
+    }
+
+    /**
+     * @summary Set the current session.
+     * @param response - The token response from Authly.
+     */
+    public async setSession(response: ITokenResponse): Promise<void> {
+        this.accessToken = response.access_token
+        if (this.storage) {
+            await this.storage.setItem(AuthlyClient.ACCESS_TOKEN_KEY, response.access_token)
+        }
+    }
+
+    /**
+     * @summary Get the current access token.
+     * @returns The access token or null if not found.
+     */
+    public async getAccessToken(): Promise<string | null> {
+        if (this.accessToken) return this.accessToken
+
+        if (this.storage) {
+            this.accessToken = await this.storage.getItem(AuthlyClient.ACCESS_TOKEN_KEY)
+        }
+
+        return this.accessToken
+    }
+
+    /**
+     * @summary Refreshes the access token using the refresh_token grant.
+     * @description In the browser, this relies on the 'session' cookie if no explicit refresh token is provided.
+     * @param refreshToken - Optional explicit refresh token.
+     * @returns A promise that resolves to the new access token.
+     */
+    public async refreshToken(refreshToken?: string): Promise<string | null> {
+        const url = `${this.issuer}${this.tokenPath}`
+        const body: Record<string, string> = {
+            grant_type: "refresh_token",
+            client_id: this.serviceId,
+        }
+
+        if (refreshToken) {
+            body.refresh_token = refreshToken
+        }
+
+        const response = await HttpClient.post<ITokenResponse>(url, {
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams(body).toString(),
+        })
+
+        if (!response.success) {
+            return null
+        }
+
+        await this.setSession(response.data!)
+        return response.data!.access_token
+    }
+
+    /**
+     * @summary Fetches the user profile from the userinfo endpoint.
+     * @description Automatically handles token expiration by attempting to refresh the token once.
+     * @returns A promise that resolves to the user profile or null if not authenticated.
+     */
+    public async getUser(): Promise<IUserProfile | null> {
+        let token = await this.getAccessToken()
+        if (!token) return null
+
+        const fetchInfo = async (currentBuffer: string) => {
+            return HttpClient.get<IUserProfile>(`${this.issuer}${this.userInfoPath}`, {
+                headers: {
+                    Authorization: `Bearer ${currentBuffer}`,
+                },
+            })
+        }
+
+        let response = await fetchInfo(token)
+
+        // If unauthorized (401), try to refresh token once
+        if (!response.success && response.error?.code === "UNAUTHORIZED") {
+            token = await this.refreshToken()
+            if (token) {
+                response = await fetchInfo(token)
+            }
+        }
+
+        if (!response.success) {
+            if (response.error?.code === "UNAUTHORIZED") {
+                await this.logout()
+            }
+            return null
+        }
+
+        return response.data!
+    }
+
+    /**
+     * @summary Synchronously check if the user is authenticated based on token presence and expiration.
+     * @description This only checks the token locally and does not perform a network request.
+     * @returns True if a valid token exists and is not expired.
+     */
+    public async isAuthenticated(): Promise<boolean> {
+        const token = await this.getAccessToken()
+        if (!token) return false
+
+        try {
+            const decoded = decodeJwt(token)
+            if (!decoded.exp) return true
+
+            const now = Math.floor(Date.now() / 1000)
+            return decoded.exp > now + 10
+        } catch {
+            return false
+        }
+    }
+
+    /**
+     * @summary Logs out the user by clearing the session from storage and memory.
+     */
+    public async logout(): Promise<void> {
+        this.accessToken = null
+        if (this.storage) {
+            await this.storage.removeItem(AuthlyClient.ACCESS_TOKEN_KEY)
+        }
     }
 
     /**
