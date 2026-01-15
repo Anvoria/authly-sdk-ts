@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect, useRef } from "react"
 import { useAuthly } from "./AuthlyContext"
 
@@ -32,12 +34,17 @@ export const AuthlyCallback: React.FC<AuthlyCallbackProps> = ({ onSuccess = "/",
             const code = params.get("code")
             const state = params.get("state")
 
+            console.log("[AuthlyCallback] Processing callback...", { code: !!code, state: !!state })
+
             if (!code || !state) {
+                console.warn("[AuthlyCallback] Missing code or state parameters.")
                 return
             }
 
             try {
+                console.log("[AuthlyCallback] Exchanging token...")
                 await client.exchangeToken(params)
+                console.log("[AuthlyCallback] Token exchanged successfully.")
 
                 await refresh()
 
