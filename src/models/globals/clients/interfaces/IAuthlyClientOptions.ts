@@ -48,6 +48,12 @@ interface IAuthlyClientOptions {
      */
     readonly tokenPath?: string
     /**
+     * @summary The path to the user info endpoint relative to the issuer.
+     * @example "/v1/oauth/userinfo"
+     * @default "/v1/oauth/userinfo"
+     */
+    readonly userInfoPath?: string
+    /**
      * @summary A list of allowed signing algorithms.
      * @example ["RS256"]
      * @default ["RS256"]
