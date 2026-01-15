@@ -1,3 +1,5 @@
+import type { IAuthlyStorage } from "./IAuthlyStorage"
+
 /**
  * @summary Options for initializing the AuthlyClient.
  */
@@ -18,6 +20,16 @@ interface IAuthlyClientOptions {
      */
     readonly serviceId: string
     /**
+     * @summary The redirect URI to use for the authorization flow.
+     * @example "https://app.example.com/api/auth/callback"
+     */
+    readonly redirectUri?: string
+    /**
+     * @summary The storage implementation to use for PKCE state and verifier.
+     * @default localStorage (in browser)
+     */
+    readonly storage?: IAuthlyStorage
+    /**
      * @summary The path to the JWKS endpoint relative to the issuer.
      * @example "/.well-known/jwks.json"
      * @default "/.well-known/jwks.json"
@@ -29,6 +41,12 @@ interface IAuthlyClientOptions {
      * @default "/authorize"
      */
     readonly authorizePath?: string
+    /**
+     * @summary The path to the token endpoint relative to the issuer.
+     * @example "/v1/oauth/token"
+     * @default "/oauth/token"
+     */
+    readonly tokenPath?: string
     /**
      * @summary A list of allowed signing algorithms.
      * @example ["RS256"]

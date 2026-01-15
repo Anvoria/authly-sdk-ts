@@ -19,6 +19,12 @@ class AuthlyConfiguration {
      */
     public static readonly DEFAULT_AUTHORIZE_PATH: string = "/authorize"
     /**
+     * @summary The default token path.
+     * @readonly This property is readonly and cannot be changed.
+     * @default "/oauth/token"
+     */
+    public static readonly DEFAULT_TOKEN_PATH: string = "/oauth/token"
+    /**
      * @summary The default algorithms.
      * @readonly This property is readonly and cannot be changed.
      * @default ["RS256"]
