@@ -234,6 +234,7 @@ class AuthlyClient {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams(body).toString(),
+            credentials: "include",
         })
 
         if (!response.success) {
@@ -258,6 +259,7 @@ class AuthlyClient {
                 headers: {
                     Authorization: `Bearer ${currentBuffer}`,
                 },
+                credentials: "include",
             })
         }
 
@@ -341,6 +343,7 @@ class AuthlyClient {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams(body).toString(),
+            credentials: "include",
         })
 
         if (!response.success) {
