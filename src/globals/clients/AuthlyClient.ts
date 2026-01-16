@@ -27,25 +27,21 @@ class AuthlyClient {
      */
     private readonly serviceId: string
     /**
-     * @summary The issuer of the client (for validation).
+     * @summary The issuer of the client.
      */
     private readonly issuer: string
     /**
-     * @summary The base URL for API requests.
+     * @summary The resolved authorize endpoint URL.
      */
-    private readonly baseUrl: string
+    private readonly authorizeEndpoint: string
     /**
-     * @summary The authorize path.
+     * @summary The resolved token endpoint URL.
      */
-    private readonly authorizePath: string
+    private readonly tokenEndpoint: string
     /**
-     * @summary The token path.
+     * @summary The resolved user info endpoint URL.
      */
-    private readonly tokenPath: string
-    /**
-     * @summary The user info path.
-     */
-    private readonly userInfoPath: string
+    private readonly userInfoEndpoint: string
     /**
      * @summary The redirect URI for the client.
      */
@@ -65,13 +61,8 @@ class AuthlyClient {
      */
     public constructor(options: IAuthlyClientOptions) {
         this.issuer = options.issuer.replace(/\/$/, "")
-        // Use baseUrl if provided, otherwise fallback to issuer
-        this.baseUrl = (options.baseUrl || this.issuer).replace(/\/$/, "")
 
         this.serviceId = options.serviceId
-        this.authorizePath = options.authorizePath || AuthlyConfiguration.DEFAULT_AUTHORIZE_PATH
-        this.tokenPath = options.tokenPath || AuthlyConfiguration.DEFAULT_TOKEN_PATH
-        this.userInfoPath = options.userInfoPath || AuthlyConfiguration.DEFAULT_USER_INFO_PATH
         this.redirectUri = options.redirectUri
         this.storage = options.storage
 
@@ -79,12 +70,30 @@ class AuthlyClient {
             this.storage = window.sessionStorage as unknown as IAuthlyStorage
         }
 
+        this.authorizeEndpoint = this.resolveUrl(options.authorizePath || AuthlyConfiguration.DEFAULT_AUTHORIZE_PATH)
+        this.tokenEndpoint = this.resolveUrl(options.tokenPath || AuthlyConfiguration.DEFAULT_TOKEN_PATH)
+        this.userInfoEndpoint = this.resolveUrl(options.userInfoPath || AuthlyConfiguration.DEFAULT_USER_INFO_PATH)
+
+        const jwksUrl = this.resolveUrl(options.jwksPath || AuthlyConfiguration.DEFAULT_JWKS_PATH)
+
         this.verifier = new JWTVerifier({
             issuer: this.issuer,
             audience: options.audience,
-            jwksUrl: `${this.baseUrl}${options.jwksPath || AuthlyConfiguration.DEFAULT_JWKS_PATH}`,
+            jwksUrl: jwksUrl,
             algorithms: options.algorithms,
         })
+    }
+
+    /**
+     * @summary Resolves a path or full URL.
+     * @param pathOrUrl - The relative path or absolute URL.
+     * @returns The full URL.
+     */
+    private resolveUrl(pathOrUrl: string): string {
+        if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
+            return pathOrUrl
+        }
+        return `${this.issuer}${pathOrUrl}`
     }
 
     /**
@@ -123,7 +132,7 @@ class AuthlyClient {
      * @returns The full authorization URL.
      */
     public getAuthorizeUrl(options: IAuthorizeUrlOptions): string {
-        const url = new URL(`${this.baseUrl}${this.authorizePath}`)
+        const url = new URL(this.authorizeEndpoint)
 
         url.searchParams.set("client_id", this.serviceId)
         url.searchParams.set("redirect_uri", options.redirectUri)
@@ -210,7 +219,7 @@ class AuthlyClient {
      * @returns A promise that resolves to the new access token.
      */
     public async refreshToken(refreshToken?: string): Promise<string | null> {
-        const url = `${this.baseUrl}${this.tokenPath}`
+        const url = this.tokenEndpoint
         const body: Record<string, string> = {
             grant_type: "refresh_token",
             client_id: this.serviceId,
@@ -245,7 +254,7 @@ class AuthlyClient {
         if (!token) return null
 
         const fetchInfo = async (currentBuffer: string) => {
-            return HttpClient.get<IUserProfile>(`${this.baseUrl}${this.userInfoPath}`, {
+            return HttpClient.get<IUserProfile>(this.userInfoEndpoint, {
                 headers: {
                     Authorization: `Bearer ${currentBuffer}`,
                 },
@@ -315,7 +324,7 @@ class AuthlyClient {
         redirectUri: string,
         codeVerifier?: string,
     ): Promise<ITokenResponse> {
-        const url = `${this.baseUrl}${this.tokenPath}`
+        const url = this.tokenEndpoint
         const body: Record<string, string> = {
             grant_type: "authorization_code",
             client_id: this.serviceId,

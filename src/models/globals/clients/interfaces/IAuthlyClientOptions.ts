@@ -6,13 +6,13 @@ import type { IAuthlyStorage } from "./IAuthlyStorage"
 interface IAuthlyClientOptions {
     /**
      * @summary The base URL of the identity provider.
-     * @description Used for token validation (iss claim). If baseUrl is not provided, it is also used for API requests.
+     * @description Used for token validation (iss claim). If paths are relative, they are appended to this URL (or baseUrl if provided).
      * @example "https://auth.example.com"
      */
     readonly issuer: string
     /**
      * @summary The base URL for API requests (optional).
-     * @description Use this if your API is hosted on a different URL than the issuer (e.g. localhost vs production domain).
+     * @description Use this if your API is hosted on a different URL than the issuer.
      * @example "http://localhost:8000"
      */
     readonly baseUrl?: string
@@ -37,26 +37,26 @@ interface IAuthlyClientOptions {
      */
     readonly storage?: IAuthlyStorage
     /**
-     * @summary The path to the JWKS endpoint relative to the baseUrl.
-     * @example "/.well-known/jwks.json"
+     * @summary The path or full URL to the JWKS endpoint.
+     * @example "/.well-known/jwks.json" or "http://localhost:8000/.well-known/jwks.json"
      * @default "/.well-known/jwks.json"
      */
     readonly jwksPath?: string
     /**
-     * @summary The path to the authorize endpoint relative to the baseUrl.
-     * @example "/v1/oauth/authorize"
-     * @default "/v1/oauth/authorize"
+     * @summary The path or full URL to the authorize endpoint.
+     * @example "/authorize" or "http://localhost:3000/login"
+     * @default "/authorize"
      */
     readonly authorizePath?: string
     /**
-     * @summary The path to the token endpoint relative to the baseUrl.
-     * @example "/v1/oauth/token"
-     * @default "/v1/oauth/token"
+     * @summary The path or full URL to the token endpoint.
+     * @example "/oauth/token" or "http://localhost:8000/oauth/token"
+     * @default "/oauth2/token"
      */
     readonly tokenPath?: string
     /**
-     * @summary The path to the user info endpoint relative to the baseUrl.
-     * @example "/v1/oauth/userinfo"
+     * @summary The path or full URL to the user info endpoint.
+     * @example "/v1/oauth/userinfo" or "http://localhost:8000/v1/oauth/userinfo"
      * @default "/v1/oauth/userinfo"
      */
     readonly userInfoPath?: string
