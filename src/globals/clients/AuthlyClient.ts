@@ -1,6 +1,5 @@
 import { decodeJwt } from "jose"
 import { JWTVerifier } from "../internal/JWTVerifier"
-import { HttpClient } from "../internal/HttpClient"
 import { PKCEUtils } from "../internal/PKCEUtils"
 import { AuthlyConfiguration } from "../configuration/AuthlyConfiguration"
 import type { IAuthlyClientOptions } from "../../models/globals/clients/interfaces/IAuthlyClientOptions"
@@ -27,9 +26,13 @@ class AuthlyClient {
      */
     private readonly serviceId: string
     /**
-     * @summary The issuer of the client.
+     * @summary The issuer of the client (for validation).
      */
     private readonly issuer: string
+    /**
+     * @summary The base URL for relative paths.
+     */
+    private readonly baseUrl: string
     /**
      * @summary The resolved authorize endpoint URL.
      */
@@ -61,6 +64,7 @@ class AuthlyClient {
      */
     public constructor(options: IAuthlyClientOptions) {
         this.issuer = options.issuer.replace(/\/$/, "")
+        this.baseUrl = (options.baseUrl || this.issuer).replace(/\/$/, "")
 
         this.serviceId = options.serviceId
         this.redirectUri = options.redirectUri
@@ -93,7 +97,7 @@ class AuthlyClient {
         if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
             return pathOrUrl
         }
-        return `${this.issuer}${pathOrUrl}`
+        return `${this.baseUrl}${pathOrUrl}`
     }
 
     /**
@@ -229,20 +233,27 @@ class AuthlyClient {
             body.refresh_token = refreshToken
         }
 
-        const response = await HttpClient.post<ITokenResponse>(url, {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams(body).toString(),
-            credentials: "include",
-        })
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    Accept: "application/json",
+                },
+                body: new URLSearchParams(body).toString(),
+                credentials: "include",
+            })
 
-        if (!response.success) {
+            if (!response.ok) {
+                return null
+            }
+
+            const data = (await response.json()) as ITokenResponse
+            await this.setSession(data)
+            return data.access_token
+        } catch {
             return null
         }
-
-        await this.setSession(response.data!)
-        return response.data!.access_token
     }
 
     /**
@@ -255,12 +266,27 @@ class AuthlyClient {
         if (!token) return null
 
         const fetchInfo = async (currentBuffer: string) => {
-            return HttpClient.get<IUserProfile>(this.userInfoEndpoint, {
-                headers: {
-                    Authorization: `Bearer ${currentBuffer}`,
-                },
-                credentials: "include",
-            })
+            try {
+                const response = await fetch(this.userInfoEndpoint, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${currentBuffer}`,
+                        Accept: "application/json",
+                    },
+                    credentials: "include",
+                })
+
+                if (!response.ok)
+                    return {
+                        success: false,
+                        error: { code: response.status === 401 ? "UNAUTHORIZED" : "ERROR", message: "Failed" },
+                    }
+
+                const data = await response.json()
+                return { success: true, data: data as IUserProfile, message: "OK" }
+            } catch (e) {
+                return { success: false, error: { code: "ERROR", message: String(e) } }
+            }
         }
 
         let response = await fetchInfo(token)
@@ -338,19 +364,23 @@ class AuthlyClient {
             body.code_verifier = codeVerifier
         }
 
-        const response = await HttpClient.post<ITokenResponse>(url, {
+        const response = await fetch(url, {
+            method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
+                Accept: "application/json",
             },
             body: new URLSearchParams(body).toString(),
             credentials: "include",
         })
 
-        if (!response.success) {
-            throw new Error(response.error?.message || "Failed to exchange code for token")
+        if (!response.ok) {
+            const text = await response.text()
+            throw new Error(`Failed to exchange code for token: ${response.status} ${text}`)
         }
 
-        return response.data!
+        const data = await response.json()
+        return data as ITokenResponse
     }
 
     /**
